@@ -12,16 +12,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const createCustomIcon = (type, status) => {
-  const isComm = status && !status.toUpperCase().includes('NOT');
+const createCustomIcon = (type) => {
   let className = 'custom-marker ';
   
-  if (type === 'ilm') className += 'shape-circle ';
-  else if (type === 'ccms') className += 'shape-square ';
-  else className += 'shape-hub ';
-
-  if (isComm) className += 'status-comm';
-  else className += 'status-not-comm';
+  if (type === 'ilm') className += 'shape-circle color-ilm';
+  else if (type === 'ccms') className += 'shape-square color-ccms';
+  else className += 'shape-hub color-hub';
 
   return L.divIcon({
     className: className,
@@ -69,10 +65,14 @@ function App() {
                const zone = cols[cols.length - 2]?.textContent?.trim();
                const ward = cols[cols.length - 1]?.textContent?.trim();
                
+               // Apply a micro-jitter (approx 1-3 meters) to separate overlapping points
+               const jitterLat = (Math.random() - 0.5) * 0.00005;
+               const jitterLon = (Math.random() - 0.5) * 0.00005;
+
                allData.push({ 
                  uid, type, status, 
-                 latitude: isNaN(lat) ? null : lat, 
-                 longitude: isNaN(lon) ? null : lon, 
+                 latitude: isNaN(lat) ? null : lat + jitterLat, 
+                 longitude: isNaN(lon) ? null : lon + jitterLon, 
                  zone, ward 
                });
             }
@@ -101,10 +101,14 @@ function App() {
             const ward = getVal(['ward', 'wardname']);
             
             if (uid) {
+               // Apply a micro-jitter (approx 1-3 meters) to separate overlapping points
+               const jitterLat = (Math.random() - 0.5) * 0.00005;
+               const jitterLon = (Math.random() - 0.5) * 0.00005;
+
                allData.push({ 
                  uid, type, status, 
-                 latitude: isNaN(lat) ? null : lat, 
-                 longitude: isNaN(lon) ? null : lon, 
+                 latitude: isNaN(lat) ? null : lat + jitterLat, 
+                 longitude: isNaN(lon) ? null : lon + jitterLon, 
                  zone, ward 
                });
             }
@@ -275,17 +279,22 @@ function App() {
       </div>
 
       <div className="map-container">
-        <MapContainer center={[12.92, 79.13]} zoom={11}>
+        <MapContainer center={[12.92, 79.13]} zoom={11} maxZoom={19}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <MarkerClusterGroup chunkedLoading maxClusterRadius={60}>
+          <MarkerClusterGroup 
+            chunkedLoading 
+            maxClusterRadius={40}
+            disableClusteringAtZoom={16}
+            spiderfyOnMaxZoom={false}
+          >
             {mapData.map((entity, idx) => (
               <Marker 
                 key={idx} 
                 position={[entity.latitude, entity.longitude]}
-                icon={createCustomIcon(entity.type, entity.status)}
+                icon={createCustomIcon(entity.type)}
               >
                 <Popup>
                   <strong>{entity.uid}</strong><br/>
@@ -303,23 +312,13 @@ function App() {
           <div className="legend-section">
             <div className="legend-title">Entity Type</div>
             <div className="legend-item">
-              <div className="shape-sample circle"></div> ILM Node
+              <div className="shape-sample circle color-ilm"></div> ILM Node
             </div>
             <div className="legend-item">
-              <div className="shape-sample square"></div> CCMS Node
+              <div className="shape-sample square color-ccms"></div> CCMS Node
             </div>
             <div className="legend-item">
-              <div className="shape-sample hub"></div> Hub
-            </div>
-          </div>
-          
-          <div className="legend-section">
-            <div className="legend-title">Status</div>
-            <div className="legend-item">
-              <div className="color-sample comm"></div> Communicating (Blue)
-            </div>
-            <div className="legend-item">
-              <div className="color-sample not-comm"></div> Not Communicating (Red)
+              <div className="shape-sample hub color-hub"></div> Hub
             </div>
           </div>
         </div>

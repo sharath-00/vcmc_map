@@ -205,12 +205,15 @@ header h1 {
   transform: rotate(45deg);
 }
 
-/* Colors based on status */
-.status-comm {
-  background-color: var(--comm-color) !important;
+/* Colors based on entity type */
+.color-ilm {
+  background-color: var(--ilm-color) !important;
 }
-.status-not-comm {
-  background-color: var(--not-comm-color) !important;
+.color-ccms {
+  background-color: var(--ccms-color) !important;
+}
+.color-hub {
+  background-color: #8b5cf6 !important;
 }
 
 .legend {
@@ -257,14 +260,6 @@ header h1 {
 .shape-sample.circle { border-radius: 50%; }
 .shape-sample.square { border-radius: 4px; }
 .shape-sample.hub { border-radius: 50% 50% 0 50%; transform: rotate(45deg); }
-
-.color-sample {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-}
-.color-sample.comm { background: var(--comm-color); }
-.color-sample.not-comm { background: var(--not-comm-color); }
 
 .loading {
   display: flex;
