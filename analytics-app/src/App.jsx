@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import * as XLSX from 'xlsx';
@@ -27,12 +27,13 @@ const createCustomIcon = (type) => {
 };
 
 function App() {
-  const [data, setData] = useState(null); // null means no data uploaded yet
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [filterType, setFilterType] = useState('All');
   const [filterZone, setFilterZone] = useState('All');
   const [filterWard, setFilterWard] = useState('All');
+  const [selectedCcms, setSelectedCcms] = useState(null);
 
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -296,8 +297,17 @@ function App() {
                 key={idx} 
                 position={[entity.latitude, entity.longitude]}
                 icon={createCustomIcon(entity.type)}
+                eventHandlers={{
+                  click: () => {
+                    if (entity.type === 'ccms') {
+                      setSelectedCcms(entity);
+                    } else {
+                      setSelectedCcms(null);
+                    }
+                  }
+                }}
               >
-                <Popup>
+                <Popup onClose={() => setSelectedCcms(null)}>
                   <strong>{entity.uid}</strong><br/>
                   Type: {entity.type.toUpperCase()}<br/>
                   Status: {entity.status}<br/>
@@ -307,6 +317,14 @@ function App() {
               </Marker>
             ))}
           </MarkerClusterGroup>
+          
+          {selectedCcms && (
+            <Circle 
+              center={[selectedCcms.latitude, selectedCcms.longitude]} 
+              radius={100} 
+              pathOptions={{ color: 'var(--ccms-color)', fillColor: 'var(--ccms-color)', fillOpacity: 0.2, weight: 2 }} 
+            />
+          )}
         </MapContainer>
 
         <div className="legend">
