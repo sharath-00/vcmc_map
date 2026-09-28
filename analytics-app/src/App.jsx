@@ -33,7 +33,7 @@ function App() {
   const [filterType, setFilterType] = useState('All');
   const [filterZone, setFilterZone] = useState('All');
   const [filterWard, setFilterWard] = useState('All');
-  const [selectedCcms, setSelectedCcms] = useState(null);
+  const [selectedCcms, setSelectedCcms] = useState([]);
 
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -236,6 +236,14 @@ function App() {
             style={{ background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer' }}>
             Upload Different Files
           </button>
+
+          {selectedCcms.length > 0 && (
+            <button 
+              onClick={() => setSelectedCcms([])}
+              style={{ background: 'transparent', border: '1px solid var(--not-comm-color)', color: 'var(--not-comm-color)', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer' }}>
+              Clear Boundaries
+            </button>
+          )}
         </div>
       </header>
       
@@ -300,14 +308,16 @@ function App() {
                 eventHandlers={{
                   click: () => {
                     if (entity.type === 'ccms') {
-                      setSelectedCcms(entity);
-                    } else {
-                      setSelectedCcms(null);
+                      setSelectedCcms(prev => {
+                        const exists = prev.find(e => e.uid === entity.uid);
+                        if (exists) return prev.filter(e => e.uid !== entity.uid);
+                        return [...prev, entity];
+                      });
                     }
                   }
                 }}
               >
-                <Popup onClose={() => setSelectedCcms(null)}>
+                <Popup>
                   <strong>{entity.uid}</strong><br/>
                   Type: {entity.type.toUpperCase()}<br/>
                   Status: {entity.status}<br/>
@@ -318,13 +328,14 @@ function App() {
             ))}
           </MarkerClusterGroup>
           
-          {selectedCcms && (
+          {selectedCcms.map((ccms) => (
             <Circle 
-              center={[selectedCcms.latitude, selectedCcms.longitude]} 
+              key={ccms.uid}
+              center={[ccms.latitude, ccms.longitude]} 
               radius={100} 
               pathOptions={{ color: 'var(--ccms-color)', fillColor: 'var(--ccms-color)', fillOpacity: 0.2, weight: 2 }} 
             />
-          )}
+          ))}
         </MapContainer>
 
         <div className="legend">
