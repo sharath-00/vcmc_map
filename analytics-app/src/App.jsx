@@ -214,6 +214,7 @@ function App() {
             <option value="All">All Entities</option>
             <option value="ilm">ILM</option>
             <option value="ccms">CCMS</option>
+            <option value="hub">Hub</option>
           </select>
 
           <select value={filterZone} onChange={e => {
